@@ -44,4 +44,29 @@ class ReportController extends Controller
         $this->addFlash('sonata_flash_success', 'Comment ' . $object->getId() . ' deleted');
         return new RedirectResponse($this->admin->generateUrl('list'));
     }
+
+    public function bannAction(Request $request = null) {
+      /* @var $object \Catrobat\AppBundle\Entity\UserComment */
+      $object = $this->admin->getSubject();
+
+      if (!$object) {
+        throw new NotFoundHttpException();
+      }
+      $em = $this->getDoctrine()->getManager();
+      $comment = $em->getRepository('AppBundle:UserComment')->find($object->getId());
+
+      if (!$comment) {
+        throw $this->createNotFoundException(
+          'No comment found for this id ' . $object->getId());
+      }
+
+      $user = $em->getRepository('AppBundle:User')->find($comment->getUserId());
+
+      if (!$user) {
+        throw $this->createNotFoundException(
+          'No user found for this id ' . $comment->getUserId());
+      }
+      $this->addFlash('sonata_flash_success', 'Did something... Comment was: ' . $user->getEmail());
+      return new RedirectResponse($this->admin->generateUrl('list'));
+    }
 }
