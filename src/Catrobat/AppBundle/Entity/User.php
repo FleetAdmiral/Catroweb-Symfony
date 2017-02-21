@@ -90,6 +90,16 @@ class User extends BaseUser implements LdapUserInterface
      */
     protected $nolb_user = false;
 
+    /**
+     * @ORM\Column(type="smallint", options={"default":0})
+     */
+    protected $times_banned = 0;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true, options={"default":null})
+     */
+    protected $banned_until = null;
+
     public function __construct()
     {
         parent::__construct();
