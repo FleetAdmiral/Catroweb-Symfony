@@ -140,6 +140,25 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/homepage-click-statistic", name="homepage_click_stats")
+     * @Method({"POST"})
+     */
+    public function makeNonRecommendedProgramClickStatisticAction(Request $request)
+    {
+        $type = $_POST['type'];
+        $referrer = $request->headers->get('referer');
+        $statistics = $this->get('statistics');
+        $locale = strtolower($request->getLocale());
+
+        if (in_array($type, ['featured', 'newest', 'mostDownloaded', 'mostViewed', 'random'])) {
+            $program_id = $_POST['programID'];
+            $statistics->createHomepageProgramClickStatistics($request, $type, $program_id, $referrer, $locale);
+            return new Response('ok');
+        } else
+            return new Response('error');
+    }
+
+    /**
      * @param $flavor
      * @param $category
      * @param $files

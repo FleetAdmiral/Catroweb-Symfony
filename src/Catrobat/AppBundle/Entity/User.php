@@ -1,6 +1,7 @@
 <?php
 namespace Catrobat\AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use FR3D\LdapBundle\Model\LdapUserInterface;
 use Sonata\UserBundle\Entity\BaseUser as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
@@ -59,6 +60,28 @@ class User extends BaseUser implements LdapUserInterface
      * @var \Doctrine\Common\Collections\Collection|ProgramLike[]
      */
     protected $likes;
+
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserSimilarityRelation",
+     *     mappedBy="first_user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     * @var \Doctrine\Common\Collections\Collection|UserSimilarityRelation[]
+     */
+    protected $relations_of_similar_users;
+
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserSimilarityRelation",
+     *     mappedBy="second_user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     * @var \Doctrine\Common\Collections\Collection|UserSimilarityRelation[]
+     */
+    protected $reverse_relations_of_similar_users;
 
     /**
      * @ORM\Column(type="string", length=300, nullable=true)
@@ -322,7 +345,7 @@ class User extends BaseUser implements LdapUserInterface
      */
     public function getLikes()
     {
-        return $this->likes;
+        return ($this->likes != null) ? $this->likes : new ArrayCollection();
     }
 
     /**

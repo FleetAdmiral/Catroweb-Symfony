@@ -71,10 +71,25 @@ class RecommenderController extends Controller
         $flavor = $request->getSession()->get('flavor');
 
         $locale = strtolower($request->getLocale());
+        $programs_count = 0;
+        $programs = [];
 
         if (substr($locale, 0, 2) == 'de') {
-            $programs_count = $program_manager->getTotalLikedProgramsCount($flavor);
-            $programs = $program_manager->getMostLikedPrograms($flavor, $limit, $offset);
+            $user = $this->getUser();
+            if ($user != null) {
+                $recommender_manager = $this->get('recommendermanager');
+                $all_programs = $recommender_manager->recommendProgramsOfSimilarUsers($user, $flavor);
+                $programs_count = count($all_programs);
+                $programs = array_slice($all_programs, $offset, $limit);
+            }
+
+            if (($user == null) || ($programs_count == 0)) {
+                $programs_count = $program_manager->getTotalLikedProgramsCount($flavor);
+                $programs = $program_manager->getMostLikedPrograms($flavor, $limit, $offset);
+            }
+        } else if (substr($locale, 0, 2) == 'fr') {
+            $programs_count = count($program_manager->getTotalPrograms($flavor));
+            $programs = $program_manager->getRandomPrograms($flavor, $limit, $offset);
         } else {
             $programs_count = $program_manager->getTotalRemixedProgramsCount($flavor);
             $programs = $program_manager->getMostRemixedPrograms($flavor, $limit, $offset);

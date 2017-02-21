@@ -3,6 +3,7 @@ namespace Catrobat\AppBundle\Services;
 
 use Behat\Mink\Exception\Exception;
 use Catrobat\AppBundle\Entity\ClickStatistic;
+use Catrobat\AppBundle\Entity\HomepageClickStatistic;
 use Catrobat\AppBundle\Entity\Program;
 use Catrobat\AppBundle\Entity\ProgramDownloads;
 use Catrobat\AppBundle\RecommenderSystem\RecommendedPageId;
@@ -226,6 +227,41 @@ class StatisticsService
             $this->addGoogleMapsGeocodeData($latitude, $longitude, $click_statistics);
         }
 
+        return true;
+    }
+
+    public function createHomepageProgramClickStatistics($request, $type, $program_id, $referrer, $locale)
+    {
+        $ip = $this->getOriginalClientIp($request);
+        $user_agent = $this->getUserAgent($request);
+        $session_user = $this->getSessionUser();
+
+        if ($session_user === 'anon.') {
+            $user = null;
+        } else {
+            $user = $session_user;
+        }
+
+        $this->logger->addDebug('create click stats for program id: ' . $program_id . ', ip: ' . $ip .
+            ', user agent: ' . $user_agent . ', referrer: ' . $referrer);
+        if ($user !== null) {
+            $this->logger->addDebug('user: ' . $user->getUsername());
+        } else {
+            $this->logger->addDebug('user: anon.');
+        }
+
+        $homepage_click_statistics = new HomepageClickStatistic();
+        $homepage_click_statistics->setType($type);
+        $homepage_click_statistics->setUserAgent($user_agent);
+        $homepage_click_statistics->setUser($user);
+        $homepage_click_statistics->setReferrer($referrer);
+        $homepage_click_statistics->setClickedAt(new \DateTime());
+        $homepage_click_statistics->setIp($ip);
+        $homepage_click_statistics->setLocale($locale);
+        $program = $this->programmanager->find($program_id);
+        $homepage_click_statistics->setProgram($program);
+        $this->entity_manager->persist($homepage_click_statistics);
+        $this->entity_manager->flush();
         return true;
     }
 
