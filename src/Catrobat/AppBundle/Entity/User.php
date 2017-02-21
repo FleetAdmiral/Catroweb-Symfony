@@ -386,7 +386,7 @@ class User extends BaseUser implements LdapUserInterface
           break;
         default:
           $time_to_ban = '+7 days';
-          $admin_message .= '1 week.';
+          $admin_message = ' is already permanently banned.';
           break;
       }
       $banned_until = new \DateTime($time_to_ban);

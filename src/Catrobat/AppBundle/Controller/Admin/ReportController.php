@@ -68,9 +68,18 @@ class ReportController extends Controller
       }
 
       $message = $user->ban();
-      $em->remove($comment);
+      $reason = $request->query->get('reason');
+      // $em->remove($comment);
       $em->flush();
+      /*
+         $mail_address = $user->getEmail();
+
+         $mail_content = wordwrap($_GET['Message'], 70);
+         $headers = "From: webmaster@catrob.at" . "\r\n";
+         mail($mail_address, "Admin Message", $mail_content, $headers);
+      */
       $this->addFlash('sonata_flash_success', 'User ' . $user->getUsername() . $message);
+      $this->addFlash('sonata_flash_success', 'Message is: ' . _('mail_messages.banned_user.subject'));
       return new RedirectResponse($this->admin->generateUrl('list'));
     }
 }
