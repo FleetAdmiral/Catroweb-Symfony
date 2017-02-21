@@ -66,7 +66,11 @@ class ReportController extends Controller
         throw $this->createNotFoundException(
           'No user found for this id ' . $comment->getUserId());
       }
-      $this->addFlash('sonata_flash_success', 'Did something... Comment was: ' . $user->getEmail());
+
+      $message = $user->ban();
+      $em->remove($comment);
+      $em->flush();
+      $this->addFlash('sonata_flash_success', 'User ' . $user->getUsername() . $message);
       return new RedirectResponse($this->admin->generateUrl('list'));
     }
 }

@@ -342,4 +342,55 @@ class User extends BaseUser implements LdapUserInterface
     {
         $this->likes = $likes;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getBannedUntil()
+    {
+      return $this->banned_until;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTimesBanned()
+    {
+      return $this->times_banned;
+    }
+
+  /**
+   * Bans the user
+   * First time: 24h
+   * Second time: 7d
+   * Third time: permanent
+   * @return String $admin_message contains the text for the flash message
+   */
+    public function ban()
+    {
+      $this->times_banned++;
+      $admin_message = ' successfully banned for ';
+      switch ($this->times_banned)
+      {
+        case 1:
+          $time_to_ban = '+1 day';
+          $admin_message .= '1 day.';
+          break;
+        case 2:
+          $time_to_ban = '+7 days';
+          $admin_message .= '1 week.';
+          break;
+        case 3:
+          $time_to_ban = '+90 years';
+          $admin_message = ' was permanently banned.';
+          break;
+        default:
+          $time_to_ban = '+7 days';
+          $admin_message .= '1 week.';
+          break;
+      }
+      $banned_until = new \DateTime($time_to_ban);
+      $this->banned_until = $banned_until;
+      return $admin_message;
+    }
 }
