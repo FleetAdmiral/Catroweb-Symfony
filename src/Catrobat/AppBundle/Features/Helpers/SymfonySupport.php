@@ -3,9 +3,11 @@ namespace Catrobat\AppBundle\Features\Helpers;
 
 use Catrobat\AppBundle\Entity\Extension;
 use Catrobat\AppBundle\Entity\ProgramDownloads;
+use Catrobat\AppBundle\Entity\ProgramLike;
 use Catrobat\AppBundle\Entity\ProgramRemixBackwardRelation;
 use Catrobat\AppBundle\Entity\ProgramRemixRelation;
 use Catrobat\AppBundle\Entity\ScratchProgramRemixRelation;
+use Catrobat\AppBundle\Entity\UserLikeSimilarityRelation;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -276,6 +278,31 @@ class SymfonySupport
         @$user_manager->updateUser($user, true);
     
         return $user;
+    }
+
+    public function insertUserSimilarity($config = array())
+    {
+        $em = $this->getManager();
+        $user_manager = $this->getUserManager();
+        $first_user = $user_manager->find($config['first_user_id']);
+        $second_user = $user_manager->find($config['second_user_id']);
+        $em->persist(new UserLikeSimilarityRelation($first_user, $second_user, $config['similarity']));
+        $em->flush();
+    }
+
+    public function insertProgramLike($config = array())
+    {
+        $em = $this->getManager();
+        $user_manager = $this->getUserManager();
+        $program_manager = $this->getProgramManager();
+        $user = $user_manager->findOneBy(['username' => $config['username']]);
+        $program = $program_manager->find($config['program_id']);
+
+        $program_like = new ProgramLike($program, $user, $config['type']);
+        $program_like->setCreatedAt(new \DateTime($config['created at'], new \DateTimeZone('UTC')));
+
+        $em->persist($program_like);
+        $em->flush();
     }
 
     public function insertTag($config)

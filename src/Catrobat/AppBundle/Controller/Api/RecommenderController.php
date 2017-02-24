@@ -64,6 +64,8 @@ class RecommenderController extends Controller
      */
     public function listRecsysGeneralProgramsAction(Request $request)
     {
+        $is_test_environment = ($this->get('kernel')->getEnvironment() == 'test');
+        $test_user_id = $is_test_environment ? intval($request->query->get('user_id', 0)) : 0;
         $limit = intval($request->query->get('limit', 20));
         $offset = intval($request->query->get('offset', 0));
 
@@ -74,8 +76,8 @@ class RecommenderController extends Controller
         $programs_count = 0;
         $programs = [];
 
-        if (substr($locale, 0, 2) == 'de') {
-            $user = $this->getUser();
+        if (substr($locale, 0, 2) == 'de' || $test_user_id > 0) {
+            $user = ($test_user_id == 0) ? $this->getUser() : $this->get('usermanager')->find($test_user_id);
             if ($user != null) {
                 $recommender_manager = $this->get('recommendermanager');
                 $all_programs = $recommender_manager->recommendProgramsOfSimilarUsers($user, $flavor);

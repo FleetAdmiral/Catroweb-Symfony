@@ -321,6 +321,40 @@ class FeatureContext extends BaseContext
     }
 
     /**
+     * @Given /^there are similar users:$/
+     */
+    public function thereAreSimilarUsers(TableNode $table)
+    {
+        $similarities = $table->getHash();
+
+        for ($i = 0; $i < count($similarities); ++ $i)
+        {
+            $this->insertUserSimilarity(array(
+                'first_user_id' => $similarities[$i]['first_user_id'],
+                'second_user_id' => $similarities[$i]['second_user_id'],
+                'similarity' => $similarities[$i]['similarity']
+            ));
+        }
+    }
+
+    /**
+     * @Given /^there are likes:$/
+     */
+    public function thereAreLikes(TableNode $table)
+    {
+        $likes = $table->getHash();
+
+        foreach($likes as $like) {
+            $this->insertProgramLike(array(
+                'username' => $like['username'],
+                'program_id' => $like['program_id'],
+                'type' => $like['type'],
+                'created at' => $like['created at']
+            ));
+        }
+    }
+
+    /**
      * @Given /^there are tags:$/
      */
     public function thereAreTags(TableNode $table)

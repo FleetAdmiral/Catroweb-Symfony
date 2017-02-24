@@ -253,6 +253,16 @@ class BaseContext implements KernelAwareContext, CustomSnippetAcceptingContext
         return $this->symfony_support->insertUser($config);
     }
 
+    public function insertUserSimilarity($config = array())
+    {
+        return $this->symfony_support->insertUserSimilarity($config);
+    }
+
+    public function insertProgramLike($config = array())
+    {
+        return $this->symfony_support->insertProgramLike($config);
+    }
+
     public function insertProgram($user, $config)
     {
         return $this->symfony_support->insertProgram($user, $config);
