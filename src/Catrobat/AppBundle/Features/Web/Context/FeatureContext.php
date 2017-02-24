@@ -1986,7 +1986,7 @@ class FeatureContext extends MinkContext implements KernelAwareContext, CustomSn
     /**
      * @Then /^There should be one database entry with type is "([^"]*)" and "([^"]*)" is "([^"]*)"$/
      */
-    public function thereShouldBeOneDatabaseEntryWithTypeIsAndIs($type_name, $name_id, $id)
+    public function thereShouldBeOneDatabaseEntryWithTypeIsAndIs($type_name, $name_id, $id_or_value)
     {
         $em = $this->kernel->getContainer()->get('doctrine')->getManager();
         $clicks = $em->getRepository('AppBundle:ClickStatistic')->findAll();
@@ -1998,13 +1998,16 @@ class FeatureContext extends MinkContext implements KernelAwareContext, CustomSn
 
         switch ($name_id) {
             case "tag_id":
-                assertEquals($id, $click->getTag()->getId());
+                assertEquals($id_or_value, $click->getTag()->getId());
                 break;
             case "extension_id":
-                assertEquals($id, $click->getExtension()->getId());
+                assertEquals($id_or_value, $click->getExtension()->getId());
                 break;
             case "program_id":
-                assertEquals($id, $click->getProgram()->getId());
+                assertEquals($id_or_value, $click->getProgram()->getId());
+                break;
+            case "user_specific_recommendation":
+                assertEquals(($id_or_value == 'true') ? true : false, $click->getUserSpecificRecommendation());
                 break;
             default:
                 assertTrue(false);

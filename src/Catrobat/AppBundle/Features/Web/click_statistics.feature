@@ -68,7 +68,7 @@ Feature: Creating click statistics by clicking on tags, extensions and recommend
     And I should see "p2"
 
   @javascript
-  Scenario: Create one statistic entry from newest programs on homepage
+  Scenario: Create one statistic entry from featured programs on homepage
     Given I am on "/pocketcode"
     Then I wait for AJAX to finish
     When I click on the first featured homepage program
@@ -129,6 +129,7 @@ Feature: Creating click statistics by clicking on tags, extensions and recommend
     When I click on the first recommended homepage program
     And I wait for AJAX to finish
     Then There should be one database entry with type is "rec_homepage" and "program_id" is "1"
+    Then There should be one database entry with type is "rec_homepage" and "user_specific_recommendation" is "false"
     And There should be no homepage click statistic database entry
     And I should see "Minions"
     And I should see "p1"
@@ -149,7 +150,7 @@ Feature: Creating click statistics by clicking on tags, extensions and recommend
     And I should see "p3"
 
   @javascript
-  Scenario: No recommendable program that has been also downloaded by users that downloaded this program
+  Scenario: No recommendable program that has been also downloaded by *other* users that downloaded this program
     Given there are program download statistics:
       | id | program_id | downloaded_at        | ip             | latitude      |  longitude  | country_code  | country_name | street              | postal_code      |  locality   | user_agent | username  | referrer |
       | 1  | 1          |  2017-02-09 16:01:00 | 88.116.169.222 | 47.2          | 10.7        | AT            | Austria      | Duck Street 1       | 1234             | Entenhausen | okhttp     | Catrobat  | Facebook |

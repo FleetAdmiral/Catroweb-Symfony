@@ -120,12 +120,13 @@ class DefaultController extends Controller
         if (in_array($type, ['programs', 'rec_homepage', 'rec_remix_graph', 'rec_remix_notification', 'rec_specific_programs'])) {
             $rec_from_id = $_POST['recFromID'];
             $rec_program_id = $_POST['recID'];
+            $is_user_specific_recommendation = isset($_POST['recIsUserSpecific']) ? (bool) $_POST['recIsUserSpecific'] : false;
             $is_recommended_program_a_scratch_program = (($type == 'rec_remix_graph') && isset($_POST['isScratchProgram']))
                                                       ? (bool) $_POST['isScratchProgram']
                                                       : false;
 
             $statistics->createClickStatistics($request, $type, $rec_from_id, $rec_program_id, null, null,
-                $referrer, $locale, $is_recommended_program_a_scratch_program);
+                $referrer, $locale, $is_recommended_program_a_scratch_program, $is_user_specific_recommendation);
             return new Response('ok');
         } else if ($type == 'tags') {
             $tag_id = $_POST['recID'];

@@ -63,25 +63,47 @@ class User extends BaseUser implements LdapUserInterface
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity="\Catrobat\AppBundle\Entity\UserSimilarityRelation",
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserLikeSimilarityRelation",
      *     mappedBy="first_user",
      *     cascade={"persist", "remove"},
      *     orphanRemoval=true
      * )
-     * @var \Doctrine\Common\Collections\Collection|UserSimilarityRelation[]
+     * @var \Doctrine\Common\Collections\Collection|UserLikeSimilarityRelation[]
      */
-    protected $relations_of_similar_users;
+    protected $relations_of_similar_users_based_on_likes;
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity="\Catrobat\AppBundle\Entity\UserSimilarityRelation",
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserLikeSimilarityRelation",
      *     mappedBy="second_user",
      *     cascade={"persist", "remove"},
      *     orphanRemoval=true
      * )
-     * @var \Doctrine\Common\Collections\Collection|UserSimilarityRelation[]
+     * @var \Doctrine\Common\Collections\Collection|UserLikeSimilarityRelation[]
      */
-    protected $reverse_relations_of_similar_users;
+    protected $reverse_relations_of_similar_users_based_on_likes;
+
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserRemixSimilarityRelation",
+     *     mappedBy="first_user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     * @var \Doctrine\Common\Collections\Collection|UserRemixSimilarityRelation[]
+     */
+    protected $relations_of_similar_users_based_on_remixes;
+
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity="\Catrobat\AppBundle\Entity\UserRemixSimilarityRelation",
+     *     mappedBy="second_user",
+     *     cascade={"persist", "remove"},
+     *     orphanRemoval=true
+     * )
+     * @var \Doctrine\Common\Collections\Collection|UserRemixSimilarityRelation[]
+     */
+    protected $reverse_relations_of_similar_users_based_on_remixes;
 
     /**
      * @ORM\Column(type="string", length=300, nullable=true)

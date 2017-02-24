@@ -177,7 +177,7 @@ class ProgramRepository extends EntityRepository
             return array_slice($this->cached_most_downloaded_other_programs_full_result[$cache_key], $offset, $limit);
         }
 
-        $time_frame_length = 300; // in seconds
+        $time_frame_length = 600; // in seconds
         $qb = $this->createQueryBuilder('e');
 
         $qb
@@ -194,7 +194,7 @@ class ProgramRepository extends EntityRepository
 
         if (!$is_test_environment) {
             $qb->andWhere($qb->expr()->between('TIME_DIFF(d1.downloaded_at, d2.downloaded_at, \'second\')',
-                $qb->expr()->literal($time_frame_length * (-1)), $qb->expr()->literal($time_frame_length)));
+                $qb->expr()->literal($time_frame_length/2 * (-1)), $qb->expr()->literal($time_frame_length/2)));
         }
 
         $qb

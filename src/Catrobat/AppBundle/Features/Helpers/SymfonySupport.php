@@ -8,6 +8,9 @@ use Catrobat\AppBundle\Entity\ProgramRemixBackwardRelation;
 use Catrobat\AppBundle\Entity\ProgramRemixRelation;
 use Catrobat\AppBundle\Entity\ScratchProgramRemixRelation;
 use Catrobat\AppBundle\Entity\UserLikeSimilarityRelation;
+use Catrobat\AppBundle\Entity\UserLikeSimilarityRelationRepository;
+use Catrobat\AppBundle\Entity\UserRemixSimilarityRelation;
+use Catrobat\AppBundle\RecommenderSystem\RecommenderManager;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
@@ -142,13 +145,37 @@ class SymfonySupport
     }
     
     /**
+     * @return RecommenderManager
+     */
+    public function getRecommenderManager()
+    {
+        return $this->kernel->getContainer()->get('recommendermanager');
+    }
+
+    /**
+     * @return UserLikeSimilarityRelationRepository
+     */
+    public function getUserLikeSimilarityRelationRepository()
+    {
+        return $this->kernel->getContainer()->get('userlikesimilarityrelationrepository');
+    }
+
+    /**
+     * @return UserLikeSimilarityRelationRepository
+     */
+    public function getUserRemixSimilarityRelationRepository()
+    {
+        return $this->kernel->getContainer()->get('userremixsimilarityrelationrepository');
+    }
+
+    /**
      * @return \Doctrine\ORM\EntityManager
      */
     public function getManager()
     {
         return $this->kernel->getContainer()->get('doctrine')->getManager();
     }
-    
+
     /**
      * @return \Symfony\Component\Routing\Router
      */
@@ -280,13 +307,33 @@ class SymfonySupport
         return $user;
     }
 
-    public function insertUserSimilarity($config = array())
+    public function computeAllLikeSimilaritiesBetweenUsers()
+    {
+        $this->getRecommenderManager()->computeUserLikeSimilarities(null);
+    }
+
+    public function computeAllRemixSimilaritiesBetweenUsers()
+    {
+        $this->getRecommenderManager()->computeUserRemixSimilarities(null);
+    }
+
+    public function insertUserLikeSimilarity($config = array())
     {
         $em = $this->getManager();
         $user_manager = $this->getUserManager();
         $first_user = $user_manager->find($config['first_user_id']);
         $second_user = $user_manager->find($config['second_user_id']);
         $em->persist(new UserLikeSimilarityRelation($first_user, $second_user, $config['similarity']));
+        $em->flush();
+    }
+
+    public function insertUserRemixSimilarity($config = array())
+    {
+        $em = $this->getManager();
+        $user_manager = $this->getUserManager();
+        $first_user = $user_manager->find($config['first_user_id']);
+        $second_user = $user_manager->find($config['second_user_id']);
+        $em->persist(new UserRemixSimilarityRelation($first_user, $second_user, $config['similarity']));
         $em->flush();
     }
 

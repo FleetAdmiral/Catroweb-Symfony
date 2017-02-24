@@ -4,6 +4,7 @@ namespace Catrobat\AppBundle\Commands;
 
 use Catrobat\AppBundle\RecommenderSystem\RecommenderManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Catrobat\AppBundle\Entity\UserManager;
@@ -57,7 +58,9 @@ class RecommenderUserSimilaritiesCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this->setName('catrobat:recommender:compute')
-            ->setDescription('Computes and updates user similarities in database needed for user-based (Collaborative Filtering) recommendations');
+            ->setDescription('Computes and updates user similarities in database needed for user-based (Collaborative Filtering) recommendations')
+            ->addArgument('type', InputArgument::REQUIRED, 'States the type of similarity to compute, value can be either "like", "remix" or "all"')
+            ->addOption('cronjob');
     }
 
     public function signalHandler($signal_number)
@@ -94,50 +97,66 @@ class RecommenderUserSimilaritiesCommand extends ContainerAwareCommand
         pcntl_signal(SIGINT, [$this, 'signalHandler']);
         pcntl_signal(SIGUSR1, [$this, 'signalHandler']);
 
-        $this->computeUserSimilarities($output);
+        $this->computeUserSimilarities($output, $input->getArgument('type'), $input->getOption('cronjob'));
     }
 
-    private function computeUserSimilarities(OutputInterface $output)
+    private function computeUserSimilarities(OutputInterface $output, $type, $is_cronjob)
     {
         $computation_start_time = new \DateTime();
-        $progress_bar_format_verbose = '%current%/%max% [%bar%] %percent:3s%% | Elapsed: %elapsed:6s% | ' .
-                                       'ETA: %estimated:-6s% | Status: %message%';
+        $progress_bar_format_verbose = '%current%/%max% [%bar%] %percent:3s%% | Elapsed: %elapsed:6s% | Status: %message%';
 
-        $users = $this->user_manager->findAll();
-        $rated_users = array_unique(array_filter($users, function ($user) { return (count($user->getLikes()) > 0); }));
-        $total_number_of_rated_users = count($rated_users);
-        $progress_bar = new ProgressBar($output, $total_number_of_rated_users);
+        $progress_bar = $is_cronjob ? new CronjobProgressWriter($output) : new ProgressBar($output);
         $progress_bar->setFormat($progress_bar_format_verbose);
-        $progress_bar->start();
 
-        //==============================================================================================================
-        // (1) lock
-        //==============================================================================================================
         $this->migration_file_lock->lock();
-
-        //==============================================================================================================
-        // (2) remove all existing user relations
-        //==============================================================================================================
         $progress_bar->setMessage('Remove all old user relations!');
-        $this->recommender_manager->removeAllUserSimilarityRelations();
-        $this->entity_manager->clear();
+        $progress_bar->start();
+        $progress_bar->display();
 
-        //==============================================================================================================
-        // (3) compute similarities between users and create user relations!
-        //==============================================================================================================
-        $this->recommender_manager->computeUserSimilarities($progress_bar);
+        if (in_array($type, ['like', 'all'])) {
+            $this->recommender_manager->removeAllUserLikeSimilarityRelations();
+            $this->entity_manager->clear();
+            $this->recommender_manager->computeUserLikeSimilarities($progress_bar);
+        }
+
+        if (in_array($type, ['remix', 'all'])) {
+            $this->recommender_manager->removeAllUserRemixSimilarityRelations();
+            $this->entity_manager->clear();
+            $this->recommender_manager->computeUserRemixSimilarities($progress_bar);
+        }
+
+        $this->migration_file_lock->unlock();
 
         $duration = (new \DateTime())->getTimestamp() - $computation_start_time->getTimestamp();
         $progress_bar->setMessage('');
         $progress_bar->finish();
         $output->writeln('');
-        $output->writeln('<info>Finished similarity computation for ' . $total_number_of_rated_users .
-                         ' users that have rated (Duration: ' . $duration . 's)</info>');
+        $output->writeln('<info>Finished similarity computation (Duration: ' . $duration . 's)</info>');
+    }
+}
 
-        //==============================================================================================================
-        // (4) unlock
-        //==============================================================================================================
-        $this->migration_file_lock->unlock();
+class CronjobProgressWriter extends ProgressBar
+{
+    /**
+     * @var OutputInterface
+     */
+    private $_output = null;
+
+    public function __construct(OutputInterface $output, $max = 0)
+    {
+        $this->_output = $output;
+        parent::__construct($output, $max);
+    }
+
+    public function clear() {}
+    public function advance($step = 1) {}
+    public function display() {}
+    public function start($max = null) {}
+    public function finish() {}
+    public function setFormat($format) {}
+    public function setMessage($message, $name = 'message')
+    {
+        $this->_output->writeln('['.date_format(new \DateTime(), "Y-m-d H:i:s").'] '.$message);
     }
 }
 

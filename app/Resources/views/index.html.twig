@@ -74,7 +74,7 @@
     mostViewed.init();
     random.init();
 
-    function performClickStatisticRequest(href, type, isRecommendedProgram, programID) {
+    function performClickStatisticRequest(href, type, isRecommendedProgram, userSpecificRecommendation, programID) {
         var url = "{{ path('click_stats') }}";
         var params = {};
 
@@ -86,7 +86,7 @@
             }
             params = { type: type, programID: programID };
         } else {
-            params = { type: type, recFromID: 0, recID: programID, isScratchProgram: 0 };
+            params = { type: type, recFromID: 0, recID: programID, isScratchProgram: 0, recIsUserSpecific: userSpecificRecommendation };
         }
 
         $.ajaxSetup({ async: false });
@@ -122,7 +122,7 @@
         var href = $(this).attr('href');
         var programID = ((href.indexOf("program") > 0) ? (href.split("program")[1].match(/[0-9]+/))[0] : 0);
         var type = "featured";
-        performClickStatisticRequest(href, type, false, programID);
+        performClickStatisticRequest(href, type, false, 0, programID);
     });
 
     $(document).one('click', ".rec-programs", function(event) {
@@ -131,7 +131,8 @@
         var type = (isRecommendedProgram ? "rec_homepage" : $(this).parent(".program").parent(".programs").parent().attr("id"));
         var href = $(this).attr('href');
         var recommendedProgramID = ((href.indexOf("program") > 0) ? (href.split("program")[1].match(/[0-9]+/))[0] : 0);
-        performClickStatisticRequest(href, type, isRecommendedProgram, recommendedProgramID);
+        var userSpecificRecommendation = ((href.indexOf("rec_user_specific=") > 0) ? parseInt((href.split("rec_user_specific=")[1].match(/[0-9]+/))[0]) : 0);
+        performClickStatisticRequest(href, type, isRecommendedProgram, userSpecificRecommendation, recommendedProgramID);
     });
 
     $(document).on("click", ".help-icon", function() {

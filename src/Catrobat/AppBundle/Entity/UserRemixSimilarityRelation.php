@@ -7,10 +7,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity
  * @ORM\HasLifecycleCallbacks
- * @ORM\Table(name="user_relation")
- * @ORM\Entity(repositoryClass="Catrobat\AppBundle\Entity\UserSimilarityRelationRepository")
+ * @ORM\Table(name="user_remix_similarity_relation")
+ * @ORM\Entity(repositoryClass="Catrobat\AppBundle\Entity\UserRemixSimilarityRelationRepository")
  */
-class UserSimilarityRelation
+class UserRemixSimilarityRelation
 {
     /**
      * -----------------------------------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ class UserSimilarityRelation
     protected $first_user_id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="\Catrobat\AppBundle\Entity\User", inversedBy="relations_of_similar_users", fetch="LAZY")
+     * @ORM\ManyToOne(targetEntity="\Catrobat\AppBundle\Entity\User", inversedBy="relations_of_similar_users_based_on_remixes", fetch="LAZY")
      * @ORM\JoinColumn(name="first_user_id", referencedColumnName="id")
      * @var \Catrobat\AppBundle\Entity\User
      */
@@ -39,7 +39,7 @@ class UserSimilarityRelation
     protected $second_user_id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="\Catrobat\AppBundle\Entity\User", inversedBy="reverse_relations_of_similar_users", fetch="LAZY")
+     * @ORM\ManyToOne(targetEntity="\Catrobat\AppBundle\Entity\User", inversedBy="reverse_relations_of_similar_users_based_on_remixes", fetch="LAZY")
      * @ORM\JoinColumn(name="second_user_id", referencedColumnName="id")
      * @var \Catrobat\AppBundle\Entity\User
      */
